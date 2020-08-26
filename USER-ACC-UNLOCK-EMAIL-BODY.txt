@@ -1,0 +1,13 @@
+Hi <b>{fName} {lName}</b>
+<br>
+Welcome to HIS, your registration is almost completed. Please below details to unlock account.
+<br><br>
+Temporary password: <b>{pwd}</b>
+<br><br>
+<a href="http://localhost:8081/unlockAcc?email={email}">
+Click here to unlock your account</a>
+<br><br>
+Thanks & Regards, 
+<br>
+HIS team.
+<br>

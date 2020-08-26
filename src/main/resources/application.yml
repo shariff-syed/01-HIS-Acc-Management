@@ -1,0 +1,24 @@
+server:
+  port: 1111
+spring:  application:    name: ACCOUNT-MANAGEMENT
+  jpa:
+    database-platform:  org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dummy@gmail.com
+    password: dummy
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
