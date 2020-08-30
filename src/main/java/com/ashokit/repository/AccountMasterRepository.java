@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.ashokit.entity.AccountsMasterEntity;
 
-public interface AccountsMasterRepository extends JpaRepository<AccountsMasterEntity, Serializable> {
-	
+public interface AccountMasterRepository extends JpaRepository<AccountsMasterEntity, Serializable> {
+
 	@Query("select role from AccountsMasterEntity")
 	List<String> findAllAccountsRoles();
 }

@@ -18,24 +18,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ashokit.constants.AppConstants;
 import com.ashokit.exception.EmployeeManagementException;
-import com.ashokit.model.HISEmployeeAccount;
-import com.ashokit.model.HISEmployeeBasicDetails;
-import com.ashokit.service.HISEmployeeAccountService;
+import com.ashokit.model.EmployeeAccount;
+import com.ashokit.model.EmployeeBasicDetails;
+import com.ashokit.model.PageResponse;
+import com.ashokit.service.AccountManagementService;
 
 @RestController
-public class EmployeeManagementController {
+public class AccountManagementController {
 
-	private static final Logger logger = LoggerFactory.getLogger(EmployeeManagementController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AccountManagementController.class);
 
 	@Autowired
-	private HISEmployeeAccountService hisEmployeeAccountService;
+	private AccountManagementService accountService;
 
+	/**
+	 * It return role types to create or update account by admin.
+	 * 
+	 * @return List of employee role types
+	 */
 	@GetMapping(value = "/getEmployeeRoles")
 	public ResponseEntity<List<String>> employeeRoles() {
 		logger.debug(AppConstants.METHOD_STARTED);
 		List<String> roles = null;
 		try {
-			roles = hisEmployeeAccountService.getAccountRoles();
+			roles = accountService.getAccountRoles();
 			logger.info(AppConstants.ROLES_SENT_SUCC);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
@@ -45,12 +51,18 @@ public class EmployeeManagementController {
 		return new ResponseEntity<>(roles, HttpStatus.OK);
 	}
 
+	/**
+	 * Create employee account by admin with basic details of employee.
+	 * 
+	 * @param employeeDetails
+	 * @return account created message or reason failed to create account message.
+	 */
 	@PostMapping(value = "/createEmployee")
-	public ResponseEntity<String> crateAccount(@RequestBody HISEmployeeBasicDetails employeeDetails) {
+	public ResponseEntity<String> crateAccount(@RequestBody EmployeeBasicDetails employeeDetails) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<String> response = null;
 		try {
-			boolean isSaved = hisEmployeeAccountService.saveAccount(employeeDetails);
+			boolean isSaved = accountService.saveAccount(employeeDetails);
 			if (isSaved == true) {
 				response = new ResponseEntity<>(AppConstants.ACC_CREATED_SUCC, HttpStatus.CREATED);
 				logger.info(AppConstants.ACC_CREATED_SUCC);
@@ -66,20 +78,25 @@ public class EmployeeManagementController {
 		return response;
 	}
 
-	@GetMapping(value = "/getEmployees/{role}")
-	public ResponseEntity<List<HISEmployeeAccount>> retrieveEmployees(@PathVariable("role") String role,
-			@RequestParam(name = "pgNo", required = false) String pageNum) {
+	/**
+	 * It return the particular employee details retrieved by employee id.
+	 * 
+	 * @param employeeId
+	 * @return employee details
+	 */
+	@GetMapping("/retreiveEmployee/{employeeId}")
+	public ResponseEntity<EmployeeAccount> retrieveEmployee(@PathVariable("employeeId") Long employeeId) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		ResponseEntity<List<HISEmployeeAccount>> response = null;
-		int pageNo = 1;
-		if (pageNum != null && pageNum != "") {
-			pageNo = Integer.parseInt(pageNum);
-		}
+		ResponseEntity<EmployeeAccount> response = null;
 		try {
-			List<HISEmployeeAccount> employeesList = hisEmployeeAccountService.getEmployeesByRole(role, pageNo - 1,
-					AppConstants.PAGE_SIZE);
-			response = new ResponseEntity<>(employeesList, HttpStatus.OK);
-			logger.info(AppConstants.ALL_EMPLOYEES_RETRIVE_SUCC);
+			EmployeeAccount account = accountService.getAccountDetailsByEmployeeId(employeeId);
+			if (account.getEmployeeId() != null) {
+				response = new ResponseEntity<>(account, HttpStatus.OK);
+				logger.info(AppConstants.EMPLOYEE_RETRIVE_SUCC);
+			} else {
+				response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				logger.info(AppConstants.INVALID_DETAILS);
+			}
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
 			throw new EmployeeManagementException(AppConstants.INVALID_DETAILS);
@@ -88,16 +105,52 @@ public class EmployeeManagementController {
 		return response;
 	}
 
+	/**
+	 * It return list of employees filtered by inputs of role and current page
+	 * number.
+	 * 
+	 * @param role
+	 * @param pageNum
+	 * @return List of employees filtered by role type and page number.
+	 */
+	@GetMapping(value = "/getEmployees/{role}")
+	public ResponseEntity<PageResponse> retrieveEmployees(@PathVariable("role") String role,
+			@RequestParam(name = "pgNo", required = false) String pageNum) {
+		logger.debug(AppConstants.METHOD_STARTED);
+		ResponseEntity<PageResponse> response = null;
+		int pageNo = 1;
+		if (pageNum != null && pageNum != "") {
+			pageNo = Integer.parseInt(pageNum);
+		}
+		try {
+			PageResponse pageResponse = accountService.getEmployeesByRole(role, pageNo - 1,
+					AppConstants.ACCS_PAGE_SIZE);
+			response = new ResponseEntity<>(pageResponse, HttpStatus.OK);
+			logger.info(AppConstants.EMPLOYEES_RETRIVE_SUCC);
+		} catch (Exception e) {
+			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
+			throw new EmployeeManagementException(AppConstants.INVALID_DETAILS);
+		}
+		logger.debug(AppConstants.METHOD_ENDED);
+		return response;
+	}
+
+	/**
+	 * It returns string response employee details are updated or if not updated
+	 * failed reason. It take input as object of employee basic details.
+	 * 
+	 * @param employeeDetails
+	 * @return string value of employee details are updated or failed reasons.
+	 */
 	@PostMapping("/updateEmployeeDetails")
-	public ResponseEntity<String> updateEmployeeDetails(@RequestBody HISEmployeeBasicDetails employeeDetails) {
+	public ResponseEntity<String> updateEmployeeDetails(@RequestBody EmployeeBasicDetails employeeDetails) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<String> response = null;
 		try {
-			HISEmployeeAccount employeeAccount = hisEmployeeAccountService
-					.getAccountDetailsByEmail(employeeDetails.getEmail());
+			EmployeeAccount employeeAccount = accountService.getAccountDetailsByEmail(employeeDetails.getEmail());
 			if (employeeAccount.getEmployeeId() != null) {
 				BeanUtils.copyProperties(employeeDetails, employeeAccount);
-				boolean updatedAccount = hisEmployeeAccountService.updatedAccount(employeeAccount);
+				boolean updatedAccount = accountService.updatedAccount(employeeAccount);
 				if (updatedAccount) {
 					response = new ResponseEntity<>(AppConstants.UPDATE_SUCC, HttpStatus.OK);
 					logger.info(AppConstants.UPDATE_SUCC);
@@ -117,16 +170,25 @@ public class EmployeeManagementController {
 		return response;
 	}
 
-	@GetMapping(value = "/deleteStatus")
-	public ResponseEntity<String> deleteEmployee(@RequestParam("employeeId") Long employeeId,
-			@RequestParam("deleteStatus") String deleteStatus) {
+	/**
+	 * It take input as employee id and switch to active or inactive by present
+	 * status.
+	 * 
+	 * @param employeeId
+	 * @return Request success or fail status.
+	 */
+	@GetMapping(value = "/deleteStatus/{employeeId}")
+	public ResponseEntity<String> deleteEmployee(@PathVariable("employeeId") Long employeeId) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<String> response = null;
 		try {
-			HISEmployeeAccount employeeAccount = hisEmployeeAccountService.getAccountDetailsByEmployeeId(employeeId);
+			EmployeeAccount employeeAccount = accountService.getAccountDetailsByEmployeeId(employeeId);
 			if (employeeAccount.getEmployeeId() != null) {
+				String deleteStatus = employeeAccount.getDeleteStatus().equals(AppConstants.DELETED_N)
+						? AppConstants.DELETED_Y
+						: AppConstants.DELETED_N;
 				employeeAccount.setDeleteStatus(deleteStatus);
-				boolean updatedAccount = hisEmployeeAccountService.updatedAccount(employeeAccount);
+				boolean updatedAccount = accountService.updatedAccount(employeeAccount);
 				if (updatedAccount) {
 					response = new ResponseEntity<>(AppConstants.REQ_SUCC, HttpStatus.OK);
 					logger.info(AppConstants.REQ_SUCC);
@@ -142,5 +204,4 @@ public class EmployeeManagementController {
 		logger.debug(AppConstants.METHOD_ENDED);
 		return response;
 	}
-
 }

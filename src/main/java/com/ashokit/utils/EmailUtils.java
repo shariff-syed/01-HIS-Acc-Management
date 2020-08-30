@@ -14,7 +14,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import com.ashokit.constants.AppConstants;
-import com.ashokit.entity.HISEmployeeAccountsEntity;
+import com.ashokit.entity.AccountManagementEntity;
 import com.ashokit.exception.EmailException;
 
 @Component
@@ -25,7 +25,7 @@ public class EmailUtils {
 	@Autowired
 	private JavaMailSender mailSender;
 
-	public boolean sendUserAccUnlockEmail(HISEmployeeAccountsEntity employee) {
+	public boolean sendUserAccUnlockEmail(AccountManagementEntity employee) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		try {
 			MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -42,7 +42,7 @@ public class EmailUtils {
 		return true;
 	}
 
-	private String getUnlockEmailBody(HISEmployeeAccountsEntity employee) throws IOException {
+	private String getUnlockEmailBody(AccountManagementEntity employee) throws IOException {
 
 		StringBuilder sb = new StringBuilder("");
 		String mailBody = null;

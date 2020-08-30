@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "HIS_EMPLOYEES")
-public class HISEmployeeAccountsEntity {
+public class AccountManagementEntity {
 
 	@Id
 	@GeneratedValue
@@ -31,7 +31,7 @@ public class HISEmployeeAccountsEntity {
 	@Column(name = "LAST_NAME")
 	private String lastName;
 	
-	@Column(name = "EMAIL")
+	@Column(name = "EMAIL", unique = true)
 	private String email;
 	
 	@Column(name = "GENDER")

@@ -13,25 +13,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.ashokit.constants.AppConstants;
-import com.ashokit.entity.HISEmployeeAccountsEntity;
+import com.ashokit.entity.AccountManagementEntity;
 import com.ashokit.exception.EmployeeManagementException;
-import com.ashokit.model.HISEmployeeAccount;
-import com.ashokit.model.HISEmployeeBasicDetails;
-import com.ashokit.repository.AccountsMasterRepository;
-import com.ashokit.repository.HISEmployeeAccountsRepository;
+import com.ashokit.model.EmployeeAccount;
+import com.ashokit.model.EmployeeBasicDetails;
+import com.ashokit.model.PageResponse;
+import com.ashokit.repository.AccountMasterRepository;
+import com.ashokit.repository.AccountManagementRepository;
 import com.ashokit.utils.EmailUtils;
 import com.ashokit.utils.PwdUtils;
 
 @Service
-public class HISEmployeeAccountServiceImpl implements HISEmployeeAccountService {
+public class AccountManagementServiceImpl implements AccountManagementService {
 
-	private static final Logger logger = LoggerFactory.getLogger(HISEmployeeAccountServiceImpl.class);
-
-	@Autowired
-	private HISEmployeeAccountsRepository hisEmployeesAccountsRepository;
+	private static final Logger logger = LoggerFactory.getLogger(AccountManagementServiceImpl.class);
 
 	@Autowired
-	private AccountsMasterRepository accountsMasterRepository;
+	private AccountManagementRepository hisEmployeesAccountsRepository;
+
+	@Autowired
+	private AccountMasterRepository accountsMasterRepository;
 
 	@Autowired
 	private PwdUtils pwdUtils;
@@ -54,20 +55,21 @@ public class HISEmployeeAccountServiceImpl implements HISEmployeeAccountService 
 	}
 
 	@Override
-	public boolean saveAccount(HISEmployeeBasicDetails employee) {
+	public boolean saveAccount(EmployeeBasicDetails employee) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		HISEmployeeAccountsEntity entity = new HISEmployeeAccountsEntity();
+		AccountManagementEntity entity = new AccountManagementEntity();
+		boolean isSaved = false;
 		try {
 			BeanUtils.copyProperties(employee, entity);
 			entity.setAccStatus(AppConstants.LOCKED);
 			entity.setDeleteStatus(AppConstants.DELETED_N);
 			entity.setPazzword(pwdUtils.generateRandomPassword(8));
-			HISEmployeeAccountsEntity createdEntity = hisEmployeesAccountsRepository.save(entity);
+			AccountManagementEntity createdEntity = hisEmployeesAccountsRepository.save(entity);
 			logger.info(AppConstants.ACC_CREATED_SUCC);
 			if (createdEntity.getEmployeeId() != null) {
 				boolean isEmailSent = emailUtils.sendUserAccUnlockEmail(createdEntity);
 				if (isEmailSent) {
-					return true;
+					isSaved = true;
 				}
 				logger.warn(AppConstants.EMAIL_SENT_FAILED);
 			}
@@ -76,54 +78,57 @@ public class HISEmployeeAccountServiceImpl implements HISEmployeeAccountService 
 			throw new EmployeeManagementException(AppConstants.INVALID_DETAILS);
 		}
 		logger.debug(AppConstants.METHOD_ENDED);
-		return false;
+		return isSaved;
 	}
 
 	@Override
-	public List<HISEmployeeAccount> getEmployeesByRole(String role, int pageNum, int pageSize) {
+	public PageResponse getEmployeesByRole(String role, int currPage, int pageSize) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		List<HISEmployeeAccount> employees = new ArrayList<>();
+		PageResponse response = null;
+		List<EmployeeAccount> employees = new ArrayList<>();
 		try {
-			PageRequest page = PageRequest.of(pageNum, pageSize);
-			Page<HISEmployeeAccountsEntity> roleContaining = hisEmployeesAccountsRepository.findByRoleContaining(role,
+			PageRequest page = PageRequest.of(currPage, pageSize);
+			Page<AccountManagementEntity> roleContaining = hisEmployeesAccountsRepository.findByRoleContaining(role,
 					page);
-			List<HISEmployeeAccountsEntity> entities = roleContaining.getContent();
+			List<AccountManagementEntity> entities = roleContaining.getContent();
 			employees = entities.stream().map(entity -> {
-				HISEmployeeAccount employee = new HISEmployeeAccount();
+				EmployeeAccount employee = new EmployeeAccount();
 				BeanUtils.copyProperties(entity, employee);
 				return employee;
 			}).collect(Collectors.toList());
+			response = new PageResponse(roleContaining.getTotalPages(), currPage + 1, employees);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
 		}
 		logger.debug(AppConstants.METHOD_ENDED);
-		return employees;
+		return response;
 	}
 
 	@Override
-	public boolean updatedAccount(HISEmployeeAccount employee) {
+	public boolean updatedAccount(EmployeeAccount employee) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		HISEmployeeAccountsEntity entity = new HISEmployeeAccountsEntity();
+		boolean isUpdated = false;
+		AccountManagementEntity entity = new AccountManagementEntity();
 		try {
 			BeanUtils.copyProperties(employee, entity);
-			HISEmployeeAccountsEntity createdEntity = hisEmployeesAccountsRepository.save(entity);
+			AccountManagementEntity createdEntity = hisEmployeesAccountsRepository.save(entity);
 			if (createdEntity.getEmployeeId() != null) {
-				return true;
+				isUpdated = true;
 			}
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
 			throw new EmployeeManagementException(AppConstants.INVALID_DETAILS);
 		}
 		logger.debug(AppConstants.METHOD_ENDED);
-		return false;
+		return isUpdated;
 	}
 
 	@Override
-	public HISEmployeeAccount getAccountDetailsByEmailAndPwd(String email, String pwd) {
+	public EmployeeAccount getAccountDetailsByEmailAndPwd(String email, String pwd) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		HISEmployeeAccount employee = new HISEmployeeAccount();
+		EmployeeAccount employee = new EmployeeAccount();
 		try {
-			HISEmployeeAccountsEntity entity = hisEmployeesAccountsRepository.findByEmailAndPazzword(email, pwd);
+			AccountManagementEntity entity = hisEmployeesAccountsRepository.findByEmailAndPazzword(email, pwd);
 			BeanUtils.copyProperties(entity, employee);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
@@ -133,11 +138,11 @@ public class HISEmployeeAccountServiceImpl implements HISEmployeeAccountService 
 	}
 
 	@Override
-	public HISEmployeeAccount getAccountDetailsByEmail(String email) {
+	public EmployeeAccount getAccountDetailsByEmail(String email) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		HISEmployeeAccount employee = new HISEmployeeAccount();
+		EmployeeAccount employee = new EmployeeAccount();
 		try {
-			HISEmployeeAccountsEntity entity = hisEmployeesAccountsRepository.findByEmail(email);
+			AccountManagementEntity entity = hisEmployeesAccountsRepository.findByEmail(email);
 			BeanUtils.copyProperties(entity, employee);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
@@ -147,11 +152,11 @@ public class HISEmployeeAccountServiceImpl implements HISEmployeeAccountService 
 	}
 
 	@Override
-	public HISEmployeeAccount getAccountDetailsByEmployeeId(Long employeeId) {
+	public EmployeeAccount getAccountDetailsByEmployeeId(Long employeeId) {
 		logger.debug(AppConstants.METHOD_STARTED);
-		HISEmployeeAccount employee = new HISEmployeeAccount();
+		EmployeeAccount employee = new EmployeeAccount();
 		try {
-			HISEmployeeAccountsEntity entity = hisEmployeesAccountsRepository.findByEmployeeId(employeeId);
+			AccountManagementEntity entity = hisEmployeesAccountsRepository.findByEmployeeId(employeeId);
 			BeanUtils.copyProperties(entity, employee);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());

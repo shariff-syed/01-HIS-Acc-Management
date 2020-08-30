@@ -21,13 +21,25 @@ public class ExceptionsHandler {
 	
 	@ExceptionHandler(value = UnlockEmployeeException.class)
 	public ResponseEntity<ApiError> handleUnlockEmployeeException() {
-		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.UNLOCK_UNSUCC, new Date());
+		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_CREDENTIALS, new Date());
 		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
 	}
 	
 	@ExceptionHandler(value = EmailException.class)
 	public ResponseEntity<ApiError> handleEmailException() {
 		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.EMAIL_SENT_FAILED, new Date());
+		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
+	}
+	
+	@ExceptionHandler(value = PlanManagementException.class)
+	public ResponseEntity<ApiError> handlePlanManagementException() {
+		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_DETAILS, new Date());
+		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
+	}
+	
+	@ExceptionHandler(value = LoginException.class)
+	public ResponseEntity<ApiError> handleLogintException() {
+		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_DETAILS, new Date());
 		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
 	}
 

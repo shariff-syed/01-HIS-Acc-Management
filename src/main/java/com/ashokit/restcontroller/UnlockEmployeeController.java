@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ashokit.constants.AppConstants;
 import com.ashokit.exception.UnlockEmployeeException;
-import com.ashokit.model.EmployeeCredentials;
-import com.ashokit.model.HISEmployeeAccount;
-import com.ashokit.service.HISEmployeeAccountService;
+import com.ashokit.model.AccountCredentialsUpdate;
+import com.ashokit.model.EmployeeAccount;
+import com.ashokit.service.AccountManagementService;
 
 @RestController
 public class UnlockEmployeeController {
@@ -21,14 +21,20 @@ public class UnlockEmployeeController {
 	private static final Logger logger = LoggerFactory.getLogger(UnlockEmployeeController.class);
 
 	@Autowired
-	private HISEmployeeAccountService hisEmployeeAccountService;
+	private AccountManagementService hisEmployeeAccountService;
 
+	/**
+	 * Unlock the admin or case worker account by temporary password.
+	 * 
+	 * @param credentials
+	 * @return status of account unlocked or invalid credentials
+	 */
 	@PostMapping(value = "/unlockAcc")
-	public ResponseEntity<String> unclockAccount(@RequestBody EmployeeCredentials credentials) {
+	public ResponseEntity<String> unclockAccount(@RequestBody AccountCredentialsUpdate credentials) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<String> response = null;
 		try {
-			HISEmployeeAccount employeeAccount = hisEmployeeAccountService
+			EmployeeAccount employeeAccount = hisEmployeeAccountService
 					.getAccountDetailsByEmailAndPwd(credentials.email, credentials.oldPwd);
 			if (employeeAccount != null && employeeAccount.getAccStatus().equals(AppConstants.LOCKED)) {
 				employeeAccount.setAccStatus(AppConstants.UN_LOCKED);
@@ -37,12 +43,12 @@ public class UnlockEmployeeController {
 				response = new ResponseEntity<>(AppConstants.UNLOCK_SUCC, HttpStatus.OK);
 				logger.info(AppConstants.UNLOCK_SUCC);
 			} else {
-				response = new ResponseEntity<>(AppConstants.UNLOCK_UNSUCC, HttpStatus.BAD_REQUEST);
-				logger.info(AppConstants.UNLOCK_UNSUCC);
+				response = new ResponseEntity<>(AppConstants.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
+				logger.info(AppConstants.INVALID_CREDENTIALS);
 			}
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
-			throw new UnlockEmployeeException(AppConstants.UNLOCK_UNSUCC);
+			throw new UnlockEmployeeException(AppConstants.INVALID_CREDENTIALS);
 		}
 		logger.debug(AppConstants.METHOD_ENDED);
 		return response;
