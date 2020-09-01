@@ -35,10 +35,10 @@ public class UnlockEmployeeController {
 		ResponseEntity<String> response = null;
 		try {
 			EmployeeAccount employeeAccount = hisEmployeeAccountService
-					.getAccountDetailsByEmailAndPwd(credentials.email, credentials.oldPwd);
+					.getAccountDetailsByEmailAndPwd(credentials.getEmail(), credentials.getOldPwd());
 			if (employeeAccount != null && employeeAccount.getAccStatus().equals(AppConstants.LOCKED)) {
 				employeeAccount.setAccStatus(AppConstants.UN_LOCKED);
-				employeeAccount.setPazzword(credentials.newPwd);
+				employeeAccount.setPazzword(credentials.getNewPwd());
 				hisEmployeeAccountService.updatedAccount(employeeAccount);
 				response = new ResponseEntity<>(AppConstants.UNLOCK_SUCC, HttpStatus.OK);
 				logger.info(AppConstants.UNLOCK_SUCC);

@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class AccountCredentialsUpdate {
 	
-	public String email;
-	public String oldPwd;
-	public String newPwd;
+	private String email;
+	private String oldPwd;
+	private String newPwd;
 
 }

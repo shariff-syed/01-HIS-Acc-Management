@@ -65,7 +65,7 @@ public class PlanManagementController {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<PageResponse> response = null;
 		int pageNo = 1;
-		if (currPage != null && currPage != "") {
+		if (currPage != null && currPage.equals("")) {
 			pageNo = Integer.parseInt(currPage);
 		}
 		try {

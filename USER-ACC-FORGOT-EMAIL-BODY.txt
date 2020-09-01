@@ -1,0 +1,11 @@
+Hi <b>{fName} {lName}</b>
+<br>
+Here your login credentials. Don't share with anyone. 
+<br><br>
+Email: <b>{email}<b>
+Password: <b>{pwd}</b>
+<br><br>
+Thanks & Regards, 
+<br>
+HIS team.
+<br>

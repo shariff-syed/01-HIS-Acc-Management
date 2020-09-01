@@ -13,8 +13,8 @@ import com.ashokit.model.ApiError;
 @RestControllerAdvice
 public class ExceptionsHandler {
 	
-	@ExceptionHandler(value = EmployeeManagementException.class)
-	public ResponseEntity<ApiError> handleCreateEmployeeException() {
+	@ExceptionHandler(value = {EmployeeManagementException.class, PlanManagementException.class, LoginException.class})
+	public ResponseEntity<ApiError> handleMultipleExceptions() {
 		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_DETAILS, new Date());
 		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
 	}
@@ -30,17 +30,4 @@ public class ExceptionsHandler {
 		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.EMAIL_SENT_FAILED, new Date());
 		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
 	}
-	
-	@ExceptionHandler(value = PlanManagementException.class)
-	public ResponseEntity<ApiError> handlePlanManagementException() {
-		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_DETAILS, new Date());
-		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
-	}
-	
-	@ExceptionHandler(value = LoginException.class)
-	public ResponseEntity<ApiError> handleLogintException() {
-		ApiError apiError = new ApiError(AppConstants.BAD_REQUEST, AppConstants.INVALID_DETAILS, new Date());
-		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST); 
-	}
-
 }

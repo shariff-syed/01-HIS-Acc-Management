@@ -63,7 +63,7 @@ public class AccountManagementController {
 		ResponseEntity<String> response = null;
 		try {
 			boolean isSaved = accountService.saveAccount(employeeDetails);
-			if (isSaved == true) {
+			if (isSaved) {
 				response = new ResponseEntity<>(AppConstants.ACC_CREATED_SUCC, HttpStatus.CREATED);
 				logger.info(AppConstants.ACC_CREATED_SUCC);
 			} else {
@@ -119,7 +119,7 @@ public class AccountManagementController {
 		logger.debug(AppConstants.METHOD_STARTED);
 		ResponseEntity<PageResponse> response = null;
 		int pageNo = 1;
-		if (pageNum != null && pageNum != "") {
+		if (pageNum != null && pageNum.equals("")) {
 			pageNo = Integer.parseInt(pageNum);
 		}
 		try {
@@ -194,7 +194,7 @@ public class AccountManagementController {
 					logger.info(AppConstants.REQ_SUCC);
 				}
 			} else {
-				response = new ResponseEntity<String>(AppConstants.REQ_UNSUCC, HttpStatus.BAD_REQUEST);
+				response = new ResponseEntity<>(AppConstants.REQ_UNSUCC, HttpStatus.BAD_REQUEST);
 				logger.info(AppConstants.REQ_UNSUCC);
 			}
 		} catch (Exception e) {

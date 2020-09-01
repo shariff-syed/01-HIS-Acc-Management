@@ -25,14 +25,14 @@ public class EmailUtils {
 	@Autowired
 	private JavaMailSender mailSender;
 
-	public boolean sendUserAccUnlockEmail(AccountManagementEntity employee) {
+	public boolean sendUserAccUnlockEmail(AccountManagementEntity employee, String mailSub, String mailDoc) {
 		logger.debug(AppConstants.METHOD_STARTED);
 		try {
 			MimeMessage mimeMessage = mailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
 			helper.setTo(employee.getEmail());
-			helper.setSubject(AppConstants.UNLOCCK_MAIL_SUB);
-			helper.setText(getUnlockEmailBody(employee), true);
+			helper.setSubject(mailSub);
+			helper.setText(getUnlockEmailBody(employee, mailDoc), true);
 			mailSender.send(mimeMessage);
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
@@ -42,11 +42,11 @@ public class EmailUtils {
 		return true;
 	}
 
-	private String getUnlockEmailBody(AccountManagementEntity employee) throws IOException {
+	private String getUnlockEmailBody(AccountManagementEntity employee, String mailDoc) throws IOException {
 
 		StringBuilder sb = new StringBuilder("");
 		String mailBody = null;
-		FileReader fr = new FileReader(AppConstants.UNLOCCK_MAIL_TXT);
+		FileReader fr = new FileReader(mailDoc);
 		try (BufferedReader br = new BufferedReader(fr)) {
 			String line = br.readLine();
 			while (line != null) {
@@ -57,7 +57,7 @@ public class EmailUtils {
 			mailBody = mailBody.replace(AppConstants.MAIL_BIND_FNAME, employee.getFirstName());
 			mailBody = mailBody.replace(AppConstants.MAIL_BIND_LNAME, employee.getLastName());
 			mailBody = mailBody.replace(AppConstants.MAIL_BIND_EMAIL, employee.getEmail());
-			mailBody = mailBody.replace(AppConstants.MAIL_BIND_PWD, employee.getPazzword());
+			mailBody = mailBody.replace(AppConstants.MAIL_BIND_PAZZWORD, employee.getPazzword());
 		} catch (Exception e) {
 			logger.error(AppConstants.EXCE_OCCUR, e.getMessage());
 			throw new EmailException(AppConstants.EMAIL_SENT_FAILED);

@@ -67,7 +67,7 @@ public class AccountManagementServiceImpl implements AccountManagementService {
 			AccountManagementEntity createdEntity = hisEmployeesAccountsRepository.save(entity);
 			logger.info(AppConstants.ACC_CREATED_SUCC);
 			if (createdEntity.getEmployeeId() != null) {
-				boolean isEmailSent = emailUtils.sendUserAccUnlockEmail(createdEntity);
+				boolean isEmailSent = emailUtils.sendUserAccUnlockEmail(createdEntity, AppConstants.UNLOCK_MAIL_SUB, AppConstants.UNLOCK_MAIL_TXT);
 				if (isEmailSent) {
 					isSaved = true;
 				}

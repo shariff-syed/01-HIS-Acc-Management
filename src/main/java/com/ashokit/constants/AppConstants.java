@@ -1,6 +1,10 @@
 package com.ashokit.constants;
 
 public class AppConstants {
+	
+	private AppConstants() {
+		
+	}
 
 	// acc management
 	public static final Integer ACCS_PAGE_SIZE = 3;
@@ -11,7 +15,6 @@ public class AppConstants {
 	public static final String CONTROLLER_PACKAGE = "com.ashokit.restcontroller";
 
 	// plan management
-
 	public static final Integer PLAN_PAGE_SIZE = 3;
 	public static final String ACTIVE_N = "N";
 	public static final String ACTIVE_Y = "Y";
@@ -50,13 +53,16 @@ public class AppConstants {
 	public static final Integer BAD_REQUEST = 400;
 
 	// utils
-	public static final String UNLOCCK_MAIL_SUB = "Unlock account";
-	public static final String UNLOCCK_MAIL_TXT = "USER-ACC-UNLOCK-EMAIL-BODY.txt";
+	public static final String UNLOCK_MAIL_SUB = "Unlock account";
+	public static final String UNLOCK_MAIL_TXT = "USER-ACC-UNLOCK-EMAIL-BODY.txt";
+	public static final String FORGOT_PAZZWORD_MAIL_SUB = "Forgot password";
+	public static final String FORGOT_PAZZWORD_MAIL_SUCC = "*** Forgot mail sent successfully ***";
+	public static final String FORGOT_PAZZWORD_MAIL_TXT = "USER-ACC-FORGOT-EMAIL-BODY.txt";
 	public static final String MAIL_BIND_FNAME = "{fName}";
 	public static final String MAIL_BIND_LNAME = "{lName}";
 	public static final String MAIL_BIND_EMAIL = "{email}";
-	public static final String MAIL_BIND_PWD = "{pwd}";
+	public static final String MAIL_BIND_PAZZWORD = "{pwd}";
 
-	public static final String PWD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	public static final String PAZZWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 }
